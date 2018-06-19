@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Shop Online</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="css/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Song+Myung" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+	<script type="text/javascript" src="js/react.js"></script>
+	<script type="text/javascript" src="js/react-dom.js"></script>
+	<script type="text/javascript" src="js/babel.min.js"></script>
+
+	<script type="text/babel">
+		class Login extends React.Component {
+
+			constructor() {
+				super();
+				this.state = {
+					username : '',
+					password : ''
+				};
+			}
+
+			setUserName(event) {
+				this.setState({
+					username: event.target.value
+				});
+			}
+
+			displayUserName() {
+				ReactDOM.render(<UserHeader username={`Welcome ` + this.state.username + ` !`} />, document.getElementById("user-name"));
+				ReactDOM.render(<Product />, document.getElementById("main-section"));
+			}
+
+			render() {
+				return(
+					<div className="text-center">
+						<input className="input-box color-grey" type="text" placeholder="Username" value={this.state.username} onChange={event => this.setUserName(event)}></input><br/>
+						<input className="input-box color-grey" type="password" placeholder="Password" id="password"></input><br/>
+						<button className="login-button" onClick={this.displayUserName.bind(this)}>Login</button>
+					</div>
+				);
+			}
+
+		}
+
+		class UserHeader extends React.Component {
+
+			logout() {
+				ReactDOM.render(<Login />, document.getElementById("main-section"));
+				ReactDOM.render(<div></div>, document.getElementById("user-name"));
+			}
+
+			render() {
+				return(
+					<nav className="flex-display">
+						<p className="nav-item flex-3">{this.props.username}</p>
+						<button onClick={this.logout.bind(this)} className="nav-item flex-1 logout-button">Logout</button>
+					</nav>
+				);
+			}
+		}
+
+		class Product extends React.Component {
+			constructor() {
+				super();
+				this.state = {
+					products : [
+						{id: 1, name: 'TV', price: '10000', brand: 'Sony'},
+						{id: 2, name: 'Refrigrator', price: '30000', brand: 'Sony'},
+						{id: 3, name: 'Washing Machine', price: '25000', brand: 'Sony'},
+						{id: 4, name: 'Radio', price: '5000', brand: 'Sony'},
+						{id: 5, name: 'Microwave', price: '7000', brand: 'Sony'},
+						{id: 6, name: 'OTG', price: '13000', brand: 'Sony'},
+						{id: 7, name: 'Mixer', price: '17000', brand: 'Sony'}
+					],
+
+					productsAddedToCart: []
+				};
+			}
+
+			addProductToCart(id) {
+				for (var i = 0; i < this.state.products.length; i++) {
+				    if(this.state.products[i].id == id){
+				    	this.state.productsAddedToCart.push(this.state.products[i]);
+				    	this.setState({
+							productsAddedToCart: this.state.productsAddedToCart
+						});
+				    }
+				}
+			}
+
+			generateBill(products) {
+				var totalPrice = 0;
+				var productList = '';
+				for (var i = 0; i < products.length; i++) {
+					if(i == 0) {
+						productList = products[i].name;
+					} else {
+						productList = productList + ', ' + products[i].name;
+					}
+					
+				    totalPrice = totalPrice + parseInt(products[i].price, 10);
+				}
+
+				ReactDOM.render(<Bill name={productList} 
+						       		price={`Rs. ` + totalPrice + `/- only`} />, document.getElementById("main-section"));
+				
+			}
+
+			render() {
+				return(
+					<div className="flex-display">
+						<div className="flex-1">
+							<h1 className="logo">Products</h1>
+						    {this.state.products.map((item, index) => (
+						       <RenderProduct 
+						       		key={item.id}
+						       		name={item.name} 
+						       		price={`Rs. ${item.price} /- only`}
+						       		brand={item.brand}
+						       		addProductToCart={(id) => { this.addProductToCart(item.id); }}
+						       />						       
+						    ))}
+						</div>
+
+						<div className="flex-1">
+							<h1 className="logo">Products Added To Cart</h1>
+						    {this.state.productsAddedToCart.map((item, index) => (
+						       <RenderProductsInCart 
+						       		key={item.id}
+						       		name={item.name} 
+						       		price={`Rs. ` + item.price + `/- only`}
+						       		brand={item.brand}
+						       />
+						       
+						    ))}
+						    {this.state.productsAddedToCart.length > 0 ?
+						    	<button onClick={(products) => { this.generateBill(this.state.productsAddedToCart); }} className="cart-button">BUY</button>:
+						    	<span/>	
+						    }
+						</div>
+					</div>
+					
+				);
+			}
+
+		}
+
+		class RenderProduct extends React.Component {
+			render() {
+				return(					
+					<div className="product"> 
+			              <div className="flex-display">
+			                    <div className="flex-1">
+			                         <span className="icon"><i className="fas fa-newspaper"></i></span>
+			                    </div>
+			                    <div className="flex-3">
+			                         <p className="section2-heading">{this.props.name}</p>
+			                         <p className="section2-content">{this.props.brand}</p>
+			                         <p className="section2-link">{this.props.price}</p>
+			                         <button onClick={this.props.addProductToCart} className="cart-button">ADD TO CART</button>
+			                    </div>
+			              </div>
+			        </div>					
+				);
+			}
+		}
+
+		class RenderProductsInCart extends React.Component {
+			render() {
+				return(					
+					<div className="product"> 
+			              <div className="flex-display">
+			                    <div className="flex-1">
+			                         <span className="icon"><i className="fas fa-newspaper"></i></span>
+			                    </div>
+			                    <div className="flex-3">
+			                         <p className="section2-heading">{this.props.name}</p>
+			                         <p className="section2-content">{this.props.brand}</p>
+			                         <p className="section2-link">{this.props.price}</p>
+			                         
+			                    </div>
+			              </div>
+			        </div>					
+				);
+			}
+		}
+
+		class Bill extends React.Component {
+
+			onPayClick() {
+				ReactDOM.render(<Product />, document.getElementById("main-section"));
+			}
+
+			render() {
+				return(					
+					<div className="bill"> 
+			              <div className="flex-display">
+			                    <div className="flex-1">
+			                         <span className="icon"><i className="fas fa-newspaper"></i></span>
+			                    </div>
+			                    <div className="flex-3">
+			                         <p className="section2-heading">{`Products: ` + this.props.name}</p>
+			                         <p className="section2-link">{`Total Price: ` + this.props.price}</p>
+			                         <button onClick={this.onPayClick.bind(this)} className="cart-button">PAY</button>
+			                    </div>
+			              </div>
+			        </div>					
+				);
+			}
+		}
+
+		function loadLoginForm() {
+			ReactDOM.render(<Login />, document.getElementById("main-section"));
+		}
+	</script>
+
+</head>
+<body onload="loadLoginForm()">
+	<header class = "container flex-display">
+		<div class="flex-1">
+			<h1 class="logo">Shop Online</h1>
+			<p class="tagline">Shop anywhere</p>
+		</div>
+		<div class="flex-1 username" id="user-name"></div>
+	</header>
+
+	<section id="main-section" class="container light-background"></section>
+
+	<footer class="container">
+
+		<div class="footer-line">
+		</div>
+
+		<div class="text-center color-grey">
+			<p>Shop Online Inc. Streetname 3, 123, Amsterdam, The Netherlands</p>
+		</div>
+
+		<div class="text-center color-grey">
+			<p>
+				tel: +31 1234 12345
+				<span class="footer-dot"><i class="fa fa-circle" aria-hidden="true"></i></span>
+				contact@shoponline.com
+			</p>
+		</div>
+	</footer>
+</body>
+</html>
